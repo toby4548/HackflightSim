@@ -77,6 +77,9 @@ AGroundCameraFlightPawn::AGroundCameraFlightPawn()
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);	// Attach the camera
 	Camera->bUsePawnControlRotation = false; // Don't rotate camera with controller
 
+	// Start Hackflight firmware
+	hackflight.init(&board, &controller, &stabilizer);
+
 	// Set handling parameters
 	Acceleration = 500.f;
 	TurnSpeed = 50.f;
@@ -103,13 +106,20 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
 
 	// Call any parent class Tick implementation
 	Super::Tick(DeltaSeconds);
+
+    // Update our flight firmware
+    hackflight.update();
+
+    // Steer the ship from Hackflight controller demands
+    //ThrustInput(4*controller.demands.throttle-2);
+    MoveUpInput(controller.demands.pitch);
 }
 
 void AGroundCameraFlightPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
-	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+    Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 
-	// Deflect along the surface when we collide.
+    // Deflect along the surface when we collide.
 	FRotator CurrentRotation = GetActorRotation();
 	SetActorRotation(FQuat::Slerp(CurrentRotation.Quaternion(), HitNormal.ToOrientationQuat(), 0.025f));
 }
@@ -121,8 +131,8 @@ void AGroundCameraFlightPawn::SetupPlayerInputComponent(class UInputComponent* P
 	check(PlayerInputComponent);
 
 	// Bind our control axis' to callback functions
-	PlayerInputComponent->BindAxis("Thrust", this, &AGroundCameraFlightPawn::ThrustInput);
-	PlayerInputComponent->BindAxis("MoveUp", this, &AGroundCameraFlightPawn::MoveUpInput);
+	//PlayerInputComponent->BindAxis("Thrust", this, &AGroundCameraFlightPawn::ThrustInput);
+	//PlayerInputComponent->BindAxis("MoveUp", this, &AGroundCameraFlightPawn::MoveUpInput);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGroundCameraFlightPawn::MoveRightInput);
 }
 
