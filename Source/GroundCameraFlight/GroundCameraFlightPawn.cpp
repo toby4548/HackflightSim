@@ -111,7 +111,7 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
     hackflight.update();
 
     // Steer the ship from Hackflight controller demands
-    //ThrustInput(4*controller.demands.throttle-2);
+    ThrustInput(4*controller.demands.throttle-2);
     MoveUpInput(controller.demands.pitch);
 }
 
@@ -132,7 +132,6 @@ void AGroundCameraFlightPawn::SetupPlayerInputComponent(class UInputComponent* P
 
 	// Bind our control axis' to callback functions
 	//PlayerInputComponent->BindAxis("Thrust", this, &AGroundCameraFlightPawn::ThrustInput);
-	//PlayerInputComponent->BindAxis("MoveUp", this, &AGroundCameraFlightPawn::MoveUpInput);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGroundCameraFlightPawn::MoveRightInput);
 }
 
