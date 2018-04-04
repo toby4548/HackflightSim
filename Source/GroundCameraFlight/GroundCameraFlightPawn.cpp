@@ -85,7 +85,7 @@ AGroundCameraFlightPawn::AGroundCameraFlightPawn()
 	TurnSpeed = 50.f;
 	MaxSpeed = 4000.f;
 	MinSpeed = 500.f;
-	CurrentForwardSpeed = 500.f;
+	CurrentForwardSpeed = 0.f;//500.f;
 }
 
 void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
@@ -104,17 +104,19 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
 	// Rotate plane
 	AddActorLocalRotation(DeltaRotation);
 
-	// Call any parent class Tick implementation
-	Super::Tick(DeltaSeconds);
-
     // Update our flight firmware
     hackflight.update();
 
+    PlaneMesh->AddForce(FVector(0, 0, controller.demands.throttle*20000));
+
     // Steer the ship from Hackflight controller demands
-    ThrottleInput(4*controller.demands.throttle-2);
-    RollInput(controller.demands.roll);
-    PitchInput(controller.demands.pitch);
-    YawInput(-controller.demands.yaw);
+    //ThrottleInput(4*controller.demands.throttle-2);
+    //RollInput(controller.demands.roll);
+    //PitchInput(controller.demands.pitch);
+    //YawInput(-controller.demands.yaw);
+
+	// Call any parent class Tick implementation
+	Super::Tick(DeltaSeconds);
 }
 
 void AGroundCameraFlightPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, 
@@ -159,8 +161,6 @@ void AGroundCameraFlightPawn::YawInput(float Val)
 
 	// Smoothly interpolate to target yaw speed
 	CurrentYawSpeed = FMath::FInterpTo(CurrentYawSpeed, TargetYawSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
-
-    hf::Debug::printf("%f", CurrentYawSpeed);
 }
 
 void AGroundCameraFlightPawn::RollInput(float Val)
