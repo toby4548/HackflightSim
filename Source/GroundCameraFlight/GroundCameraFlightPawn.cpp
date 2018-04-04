@@ -9,6 +9,12 @@
 #include "Engine/World.h"
 #include "Engine/StaticMesh.h"
 
+// Math support
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+#include <hackflight.hpp>
+
 AGroundCameraFlightPawn::AGroundCameraFlightPawn()
 {
 	// Structure to hold one-time initialization
