@@ -26,19 +26,20 @@ public:
 
 	// Begin AActor overrides
 	virtual void Tick(float DeltaSeconds) override;
-	virtual void NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
+	virtual void NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, 
+            bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 	// End AActor overrides
 
 protected:
 
 	/** Bound to the thrust axis */
-	void ThrustInput(float Val);
+	void ThrottleInput(float Val);
 	
 	/** Bound to the vertical axis */
-	void MoveUpInput(float Val);
+	void PitchInput(float Val);
 
 	/** Bound to the horizontal axis */
-	void MoveRightInput(float Val);
+	void YawInput(float Val);
 
 private:
 

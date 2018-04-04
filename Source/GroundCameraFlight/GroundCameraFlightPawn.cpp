@@ -111,12 +111,13 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
     hackflight.update();
 
     // Steer the ship from Hackflight controller demands
-    ThrustInput(4*controller.demands.throttle-2);
-    MoveUpInput(controller.demands.pitch);
-    MoveRightInput(-controller.demands.yaw);
+    ThrottleInput(4*controller.demands.throttle-2);
+    PitchInput(controller.demands.pitch);
+    YawInput(-controller.demands.yaw);
 }
 
-void AGroundCameraFlightPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+void AGroundCameraFlightPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, 
+        bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
     Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 
@@ -126,7 +127,7 @@ void AGroundCameraFlightPawn::NotifyHit(class UPrimitiveComponent* MyComp, class
 }
 
 
-void AGroundCameraFlightPawn::ThrustInput(float Val)
+void AGroundCameraFlightPawn::ThrottleInput(float Val)
 {
 	// Is there any input?
 	bool bHasInput = !FMath::IsNearlyEqual(Val, 0.f);
@@ -138,7 +139,7 @@ void AGroundCameraFlightPawn::ThrustInput(float Val)
 	CurrentForwardSpeed = FMath::Clamp(NewForwardSpeed, MinSpeed, MaxSpeed);
 }
 
-void AGroundCameraFlightPawn::MoveUpInput(float Val)
+void AGroundCameraFlightPawn::PitchInput(float Val)
 {
 	// Target pitch speed is based in input
 	float TargetPitchSpeed = (Val * TurnSpeed * -1.f);
@@ -150,7 +151,7 @@ void AGroundCameraFlightPawn::MoveUpInput(float Val)
 	CurrentPitchSpeed = FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 }
 
-void AGroundCameraFlightPawn::MoveRightInput(float Val)
+void AGroundCameraFlightPawn::YawInput(float Val)
 {
     hf::Debug::printf("%f", Val);
 
