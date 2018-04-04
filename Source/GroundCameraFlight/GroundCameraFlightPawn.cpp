@@ -113,6 +113,7 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
     // Steer the ship from Hackflight controller demands
     ThrustInput(4*controller.demands.throttle-2);
     MoveUpInput(controller.demands.pitch);
+    MoveRightInput(-controller.demands.yaw);
 }
 
 void AGroundCameraFlightPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
@@ -124,16 +125,6 @@ void AGroundCameraFlightPawn::NotifyHit(class UPrimitiveComponent* MyComp, class
 	SetActorRotation(FQuat::Slerp(CurrentRotation.Quaternion(), HitNormal.ToOrientationQuat(), 0.025f));
 }
 
-
-void AGroundCameraFlightPawn::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
-{
-    // Check if PlayerInputComponent is valid (not NULL)
-	check(PlayerInputComponent);
-
-	// Bind our control axis' to callback functions
-	//PlayerInputComponent->BindAxis("Thrust", this, &AGroundCameraFlightPawn::ThrustInput);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AGroundCameraFlightPawn::MoveRightInput);
-}
 
 void AGroundCameraFlightPawn::ThrustInput(float Val)
 {
@@ -161,6 +152,8 @@ void AGroundCameraFlightPawn::MoveUpInput(float Val)
 
 void AGroundCameraFlightPawn::MoveRightInput(float Val)
 {
+    hf::Debug::printf("%f", Val);
+
 	// Target yaw speed is based on input
 	float TargetYawSpeed = (Val * TurnSpeed);
 
