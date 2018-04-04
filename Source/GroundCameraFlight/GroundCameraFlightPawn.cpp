@@ -13,7 +13,38 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+// Hackflight support ---------------------------------------------
+
+// Main firmware
 #include <hackflight.hpp>
+hf::Hackflight hackflight;
+
+// Controller input
+#ifdef _WIN32
+#include <receivers/sim/windows.hpp>
+#else
+#include <receivers/sim/linux.hpp>
+#endif
+hf::Controller controller;
+
+// Board simulation
+#include "HackflightSimBoard.hpp"
+
+// PID tuning
+hf::Stabilizer stabilizer = hf::Stabilizer(
+	1.0f,      // Level P
+	.00001f,    // Gyro cyclic P
+	0,			// Gyro cyclic I
+	0,			// Gyro cyclic D
+	0,			// Gyro yaw P
+	0);			// Gyro yaw I
+
+
+// Board simulation
+#include <boards/sim/sim.hpp>
+hf::SimBoard board;
+
+// Pawn methods ---------------------------------------------------
 
 AGroundCameraFlightPawn::AGroundCameraFlightPawn()
 {
