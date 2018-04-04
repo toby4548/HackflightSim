@@ -107,7 +107,13 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
     // Update our flight firmware
     hackflight.update();
 
-    PlaneMesh->AddForce(FVector(0, 0, controller.demands.throttle*20000));
+    float gyroRates[3];
+    float translationRates[3];
+    float motors[4];
+    board.simGetVehicleState(gyroRates, translationRates, motors);
+    hf::Debug::printf("%f %f %f %f", motors[0], motors[1], motors[2], motors[3]);
+
+    PlaneMesh->AddForce(FVector(0, 0, 20000*(motors[0]+motors[1]+motors[2]+motors[3])/4));
 
     // Steer the ship from Hackflight controller demands
     //ThrottleInput(4*controller.demands.throttle-2);
