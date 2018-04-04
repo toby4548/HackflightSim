@@ -16,7 +16,7 @@ AGroundCameraFlightPawn::AGroundCameraFlightPawn()
 	{
 		ConstructorHelpers::FObjectFinderOptional<UStaticMesh> PlaneMesh;
 		FConstructorStatics()
-			: PlaneMesh(TEXT("/Game/Flying/Meshes/UFO.UFO"))
+			: PlaneMesh(TEXT("/Game/Flying/Meshes/3DFly.3DFly"))
 		{
 		}
 	};
