@@ -32,13 +32,9 @@ public:
 
 protected:
 
-	/** Bound to the thrust axis */
 	void ThrottleInput(float Val);
-	
-	/** Bound to the vertical axis */
 	void PitchInput(float Val);
-
-	/** Bound to the horizontal axis */
+	void RollInput(float Val);
 	void YawInput(float Val);
 
 private:

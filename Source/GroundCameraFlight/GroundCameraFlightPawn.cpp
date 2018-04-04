@@ -112,6 +112,7 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
 
     // Steer the ship from Hackflight controller demands
     ThrottleInput(4*controller.demands.throttle-2);
+    RollInput(controller.demands.roll);
     PitchInput(controller.demands.pitch);
     YawInput(-controller.demands.yaw);
 }
@@ -153,21 +154,17 @@ void AGroundCameraFlightPawn::PitchInput(float Val)
 
 void AGroundCameraFlightPawn::YawInput(float Val)
 {
-    hf::Debug::printf("%f", Val);
-
 	// Target yaw speed is based on input
 	float TargetYawSpeed = (Val * TurnSpeed);
 
 	// Smoothly interpolate to target yaw speed
 	CurrentYawSpeed = FMath::FInterpTo(CurrentYawSpeed, TargetYawSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 
-	// Is there any left/right input?
-	const bool bIsTurning = FMath::Abs(Val) > 0.2f;
+    hf::Debug::printf("%f", CurrentYawSpeed);
+}
 
-	// If turning, yaw value is used to influence roll
-	// If not turning, roll to reverse current roll value.
-	float TargetRollSpeed = bIsTurning ? (CurrentYawSpeed * 0.5f) : (GetActorRotation().Roll * -2.f);
+void AGroundCameraFlightPawn::RollInput(float Val)
+{
+	CurrentRollSpeed = 20*Val;
 
-	// Smoothly interpolate roll speed
-	CurrentRollSpeed = FMath::FInterpTo(CurrentRollSpeed, TargetRollSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 }
