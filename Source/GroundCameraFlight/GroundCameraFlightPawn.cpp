@@ -53,19 +53,6 @@ AGroundCameraFlightPawn::AGroundCameraFlightPawn()
 	PlaneMesh->SetStaticMesh(ConstructorStatics.PlaneMesh.Get());	// Set static mesh
 	RootComponent = PlaneMesh;
 
-	// Create a spring arm component
-	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm0"));
-	SpringArm->SetupAttachment(RootComponent);	// Attach SpringArm to RootComponent
-	SpringArm->TargetArmLength = 160.0f; // The camera follows at this distance behind the character	
-	SpringArm->SocketOffset = FVector(0.f,0.f,60.f);
-	SpringArm->bEnableCameraLag = false;	// Do not allow camera to lag
-	SpringArm->CameraLagSpeed = 15.f;
-
-	// Create camera component 
-	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera0"));
-	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);	// Attach the camera
-	Camera->bUsePawnControlRotation = false; // Don't rotate camera with controller
-
 	// Start Hackflight firmware
 	hackflight.init(this, &controller, &stabilizer);
 

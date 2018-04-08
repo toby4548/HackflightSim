@@ -21,13 +21,6 @@ class AGroundCameraFlightPawn : public APawn, public Board
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* PlaneMesh;
 
-	/** Spring arm that will offset the camera */
-	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* SpringArm;
-
-	/** Camera component that will be our viewpoint */
-	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* Camera;
 public:
 	AGroundCameraFlightPawn();
 
@@ -89,7 +82,7 @@ public:
 	/** Returns PlaneMesh subobject **/
 	FORCEINLINE class UStaticMeshComponent* GetPlaneMesh() const { return PlaneMesh; }
 	/** Returns SpringArm subobject **/
-	FORCEINLINE class USpringArmComponent* GetSpringArm() const { return SpringArm; }
+	//FORCEINLINE class USpringArmComponent* GetSpringArm() const { return SpringArm; }
 	/** Returns Camera subobject **/
-	FORCEINLINE class UCameraComponent* GetCamera() const { return Camera; }
+	//FORCEINLINE class UCameraComponent* GetCamera() const { return Camera; }
 };
