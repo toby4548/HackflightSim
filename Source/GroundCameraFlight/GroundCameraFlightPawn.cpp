@@ -9,14 +9,7 @@
 #include "Engine/World.h"
 #include "Engine/StaticMesh.h"
 
-// Math support
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-// Hackflight support ---------------------------------------------
-
 // Main firmware
-#include <hackflight.hpp>
 hf::Hackflight hackflight;
 
 // Controller input
@@ -39,10 +32,6 @@ hf::Stabilizer stabilizer = hf::Stabilizer(
 	0,			// Gyro yaw P
 	0);			// Gyro yaw I
 
-
-// Board simulation
-#include <boards/sim/sim.hpp>
-hf::SimBoard board;
 
 // Pawn methods ---------------------------------------------------
 
@@ -78,7 +67,7 @@ AGroundCameraFlightPawn::AGroundCameraFlightPawn()
 	Camera->bUsePawnControlRotation = false; // Don't rotate camera with controller
 
 	// Start Hackflight firmware
-	hackflight.init(&board, &controller, &stabilizer);
+	hackflight.init(this, &controller, &stabilizer);
 
 	// Set handling parameters
 	Acceleration = 500.f;
@@ -86,6 +75,12 @@ AGroundCameraFlightPawn::AGroundCameraFlightPawn()
 	MaxSpeed = 4000.f;
 	MinSpeed = 500.f;
 	CurrentForwardSpeed = 0.f;//500.f;
+
+    for (uint8_t k=0; k<4; ++k) {
+        motors[k] = 0;
+    }
+
+    elapsedTime = 0;
 }
 
 void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
@@ -107,19 +102,15 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
     // Update our flight firmware
     hackflight.update();
 
-    float gyroRates[3];
-    float translationRates[3];
-    float motors[4];
-    board.simGetVehicleState(gyroRates, translationRates, motors);
-    hf::Debug::printf("%f %f %f %f", motors[0], motors[1], motors[2], motors[3]);
-
-    PlaneMesh->AddForce(FVector(0, 0, 20000*(motors[0]+motors[1]+motors[2]+motors[3])/4));
-
     // Steer the ship from Hackflight controller demands
     //ThrottleInput(4*controller.demands.throttle-2);
     //RollInput(controller.demands.roll);
     //PitchInput(controller.demands.pitch);
     //YawInput(-controller.demands.yaw);
+
+    elapsedTime += DeltaSeconds;
+
+    PlaneMesh->AddForce(FVector(0, 0, 20000*(motors[0]+motors[1]+motors[2]+motors[3])/4));
 
 	// Call any parent class Tick implementation
 	Super::Tick(DeltaSeconds);
@@ -174,3 +165,31 @@ void AGroundCameraFlightPawn::RollInput(float Val)
 	CurrentRollSpeed = 20*Val;
 
 }
+
+void AGroundCameraFlightPawn::init(void)
+{
+}
+
+bool AGroundCameraFlightPawn::getEulerAngles(float eulerAngles[3]) 
+{
+    eulerAngles[0] = eulerAngles[1] = eulerAngles[2] = 0;
+    return true;
+}
+
+bool AGroundCameraFlightPawn::getGyroRates(float gyroRates[3]) 
+{
+    gyroRates[0] = gyroRates[1] = gyroRates[2] = 0;
+    return true;
+}
+
+uint32_t AGroundCameraFlightPawn::getMicroseconds() 
+{
+    return (uint32_t)(elapsedTime*1e6);
+}
+
+void AGroundCameraFlightPawn::writeMotor(uint8_t index, float value) 
+{
+    motors[index] = value;
+}
+
+

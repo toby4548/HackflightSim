@@ -1,12 +1,19 @@
 // Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 #pragma once
 
+// Math support
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+#include <hackflight.hpp>
+using namespace hf;
+
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "GroundCameraFlightPawn.generated.h"
 
 UCLASS(Config=Game)
-class AGroundCameraFlightPawn : public APawn
+class AGroundCameraFlightPawn : public APawn, public Board
 {
 	GENERATED_BODY()
 
@@ -29,6 +36,13 @@ public:
 	virtual void NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, 
             bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 	// End AActor overrides
+
+    virtual void     init(void) override;
+    virtual bool     getEulerAngles(float eulerAngles[3]) override;
+    virtual bool     getGyroRates(float gyroRates[3]) override;
+    virtual uint32_t getMicroseconds() override;
+    virtual void     writeMotor(uint8_t index, float value) override;
+
 
 protected:
 
@@ -66,6 +80,10 @@ private:
 
 	/** Current roll speed */
 	float CurrentRollSpeed;
+
+    float motors[4];
+
+    float elapsedTime;
 
 public:
 	/** Returns PlaneMesh subobject **/
