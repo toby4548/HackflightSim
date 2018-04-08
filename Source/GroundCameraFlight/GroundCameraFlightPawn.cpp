@@ -20,9 +20,6 @@ hf::Hackflight hackflight;
 #endif
 hf::Controller controller;
 
-// Board simulation
-#include "HackflightSimBoard.hpp"
-
 // PID tuning
 hf::Stabilizer stabilizer = hf::Stabilizer(
 	1.0f,      // Level P
