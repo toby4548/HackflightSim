@@ -161,9 +161,30 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
     forces[1] = motorsToAngularForce(1, 3, 0, 2); 
     forces[2] = motorsToAngularForce(1, 2, 0, 3); 
 
+    // Rotate vehicle
     AddActorLocalRotation(DeltaSeconds * FRotator(forces[1], forces[2], forces[0]) * (180 / M_PI));
 
-    Debug::printf("%f %f %f", forces[0], forces[1], forces[2]);
+    // Get current quaternion
+    FQuat q = this->GetActorQuat();
+
+    // Turn quaternion into Euler angles
+    // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+
+    // roll (x-axis rotation)
+    float sinr = +2.0 * (q.W * q.X + q.Y * q.Z);
+    float cosr = +1.0 - 2.0 * (q.X * q.X + q.Y * q.Y);
+    float roll = atan2(sinr, cosr);
+
+    // pitch (y-axis rotation)
+    float sinp = +2.0 * (q.W * q.Y - q.Z * q.X);
+    float pitch = (fabs(sinp) >= 1) ?  copysign(M_PI / 2, sinp) /* use 90 degrees if out of range */ : asin(sinp);
+
+    // yaw (z-axis rotation)
+    float siny = +2.0 * (q.W * q.Z + q.X * q.Y);
+    float cosy = +1.0 - 2.0 * (q.Y * q.Y + q.Z * q.Z);
+    float yaw = atan2(siny, cosy);
+
+    Debug::printf("%f %f %f", roll, pitch, yaw);
 
     PlaneMesh->AddForce(FVector(0, 0, 20000*(motorvals[0]+motorvals[1]+motorvals[2]+motorvals[3])/4));
 
@@ -227,27 +248,27 @@ void AGroundCameraFlightPawn::writeMotor(uint8_t index, float value)
 }
 
 /*
-void AGroundCameraFlightPawn::ThrottleInput(float Val)
-{
-    // Is there any input?
-    bool bHasInput = !FMath::IsNearlyEqual(Val, 0.f);
-    // If input is not held down, reduce speed
-    float CurrentAcc = bHasInput ? (Val * Acceleration) : (-0.5f * Acceleration);
-    // Calculate new speed
-    float NewForwardSpeed = CurrentForwardSpeed + (GetWorld()->GetDeltaSeconds() * CurrentAcc);
-    // Clamp between MinSpeed and MaxSpeed
-    CurrentForwardSpeed = FMath::Clamp(NewForwardSpeed, MinSpeed, MaxSpeed);
+   void AGroundCameraFlightPawn::ThrottleInput(float Val)
+   {
+// Is there any input?
+bool bHasInput = !FMath::IsNearlyEqual(Val, 0.f);
+// If input is not held down, reduce speed
+float CurrentAcc = bHasInput ? (Val * Acceleration) : (-0.5f * Acceleration);
+// Calculate new speed
+float NewForwardSpeed = CurrentForwardSpeed + (GetWorld()->GetDeltaSeconds() * CurrentAcc);
+// Clamp between MinSpeed and MaxSpeed
+CurrentForwardSpeed = FMath::Clamp(NewForwardSpeed, MinSpeed, MaxSpeed);
 }
 
 void AGroundCameraFlightPawn::PitchInput(float Val)
 {
-    // Target pitch speed is based in input
-    float TargetPitchSpeed = (Val * TurnSpeed * -1.f);
+// Target pitch speed is based in input
+float TargetPitchSpeed = (Val * TurnSpeed * -1.f);
 
-    // When steering, we decrease pitch slightly
-    TargetPitchSpeed += (FMath::Abs(CurrentYawSpeed) * -0.2f);
+// When steering, we decrease pitch slightly
+TargetPitchSpeed += (FMath::Abs(CurrentYawSpeed) * -0.2f);
 
-    // Smoothly interpolate to target pitch speed
+// Smoothly interpolate to target pitch speed
     CurrentPitchSpeed = FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 }
 
