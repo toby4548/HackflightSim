@@ -90,9 +90,10 @@ void AGroundCameraFlightPawn::BeginPlay()
     for (int i = 0; i < staticComponents.Num(); i++) {
         if (staticComponents[i]) {
             UStaticMeshComponent* child = staticComponents[i];
-            if (child->GetName() == "Prop1") {
-                PropMeshes[0] = child;
-            }
+            if (child->GetName() == "Prop1") PropMeshes[0] = child;
+            if (child->GetName() == "Prop2") PropMeshes[1] = child;
+            if (child->GetName() == "Prop3") PropMeshes[2] = child;
+            if (child->GetName() == "Prop4") PropMeshes[3] = child;
         }
 	}
 
@@ -118,21 +119,17 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
     // Update our flight firmware
     hackflight.update();
 
-    // Steer the ship from Hackflight controller demands
-    //ThrottleInput(4*controller.demands.throttle-2);
-    //RollInput(controller.demands.roll);
-    //PitchInput(controller.demands.pitch);
-    //YawInput(-controller.demands.yaw);
-
     elapsedTime += DeltaSeconds;
 
     PlaneMesh->AddForce(FVector(0, 0, 20000*(motors[0]+motors[1]+motors[2]+motors[3])/4));
 
-    FRotator PropRotation(0, 10, 0);
-    PropMeshes[0]->AddLocalRotation(PropRotation);
+    for (uint8_t k=0; k<4; ++k) {
+        FRotator PropRotation(0, 10, 0);
+        PropMeshes[k]->AddLocalRotation(PropRotation);
+    }
 
-	// Call any parent class Tick implementation
-	Super::Tick(DeltaSeconds);
+    // Call any parent class Tick implementation
+    Super::Tick(DeltaSeconds);
 }
 
 void AGroundCameraFlightPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, 
