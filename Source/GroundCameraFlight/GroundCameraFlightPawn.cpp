@@ -165,9 +165,19 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
     // Convert quaternion to Euler angles
     FVector euler = FMath::DegreesToRadians(q.Euler());
 
-    Debug::printf("%f %f %f", euler.X, euler.Y, euler.Z);
+    // Rename Euler X,Y,Z to familiar Greek-letter variables
+    float phi   = euler.X;
+    float theta = euler.Y;
+    float psi   = euler.Z;
 
-    PlaneMesh->AddForce(5000*motorSum*FVector(0, 0, 1));
+    // Rotate Euler angles into inertial frame
+    float x = sin(phi)*sin(psi) + cos(phi)*cos(psi)*sin(theta);
+    float y = cos(phi)*sin(theta)*sin(psi) - cos(psi)*sin(phi);
+    float z = cos(theta)*cos(phi);
+
+    Debug::printf("%f %f %f", x, y, z);
+
+    PlaneMesh->AddForce(5000*motorSum*FVector(-x, -y, z));
 
     // Modulate the pitch and voume of the propeller sound
     propellerAudioComponent->SetFloatParameter(FName("pitch"), motorSum / 4);
