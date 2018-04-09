@@ -20,6 +20,21 @@ hf::Hackflight hackflight;
 #endif
 hf::Controller controller;
 
+// Debugging
+
+static FColor TEXT_COLOR = FColor::Yellow;
+static float  TEXT_SCALE = 2.f;
+
+void hf::Board::outbuf(char * buf)
+{
+	if (GEngine) {
+
+		// 0 = overwrite; 5.0f = arbitrary time to display
+		GEngine->AddOnScreenDebugMessage(0, 5.0f, TEXT_COLOR, FString(buf), true, FVector2D(TEXT_SCALE,TEXT_SCALE));
+	}
+
+}
+
 // PID tuning
 hf::Stabilizer stabilizer = hf::Stabilizer(
 	1.0f,      // Level P
@@ -95,6 +110,19 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
     elapsedTime += DeltaSeconds;
 
     PlaneMesh->AddForce(FVector(0, 0, 20000*(motors[0]+motors[1]+motors[2]+motors[3])/4));
+
+    TArray<UStaticMeshComponent *> staticComponents;
+    this->GetComponents<UStaticMeshComponent>(staticComponents);
+
+    for (int i = 0; i < staticComponents.Num(); i++) {
+        if (staticComponents[i]) {
+            UStaticMeshComponent* child = staticComponents[i];
+            if (child->GetName() == "Prop1") {
+                FRotator PropRotation(0, 10, 0);
+                child->AddLocalRotation(PropRotation);
+            }
+        }
+	}
 
 	// Call any parent class Tick implementation
 	Super::Tick(DeltaSeconds);
