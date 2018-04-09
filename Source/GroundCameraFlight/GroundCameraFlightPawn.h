@@ -78,7 +78,7 @@ private:
 	/** Current roll speed */
 	float CurrentRollSpeed;
 
-    float motors[4];
+    float motorvals[4];
 
     float elapsedTime;
 

@@ -76,7 +76,7 @@ AGroundCameraFlightPawn::AGroundCameraFlightPawn()
 	CurrentForwardSpeed = 0.f;//500.f;
 
     for (uint8_t k=0; k<4; ++k) {
-        motors[k] = 0;
+        motorvals[k] = 0;
     }
 
     elapsedTime = 0;
@@ -121,10 +121,11 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
 
     elapsedTime += DeltaSeconds;
 
-    PlaneMesh->AddForce(FVector(0, 0, 20000*(motors[0]+motors[1]+motors[2]+motors[3])/4));
+    PlaneMesh->AddForce(FVector(0, 0, 20000*(motorvals[0]+motorvals[1]+motorvals[2]+motorvals[3])/4));
 
+    // Spin props proportionate to motor values
     for (uint8_t k=0; k<4; ++k) {
-        FRotator PropRotation(0, 10, 0);
+        FRotator PropRotation(0, motorvals[k]*60, 0);
         PropMeshes[k]->AddLocalRotation(PropRotation);
     }
 
@@ -205,7 +206,7 @@ uint32_t AGroundCameraFlightPawn::getMicroseconds()
 
 void AGroundCameraFlightPawn::writeMotor(uint8_t index, float value) 
 {
-    motors[index] = value;
+    motorvals[index] = value;
 }
 
 
