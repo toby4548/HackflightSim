@@ -8,6 +8,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Engine/World.h"
 #include "Engine/StaticMesh.h"
+#include "Runtime/Core/Public/Math/UnrealMathUtility.h"
 
 // Main firmware
 hf::Hackflight hackflight;
@@ -161,11 +162,12 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
     // Get current quaternion
     FQuat q = this->GetActorQuat();
 
-    FVector euler = q.Euler();
+    // Convert quaternion to Euler angles
+    FVector euler = FMath::DegreesToRadians(q.Euler());
 
     Debug::printf("%f %f %f", euler.X, euler.Y, euler.Z);
 
-    PlaneMesh->AddForce(5000*FVector(0, 0, motorSum));
+    PlaneMesh->AddForce(5000*motorSum*FVector(0, 0, 1));
 
     // Modulate the pitch and voume of the propeller sound
     propellerAudioComponent->SetFloatParameter(FName("pitch"), motorSum / 4);
