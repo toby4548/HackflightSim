@@ -135,20 +135,6 @@ void AGroundCameraFlightPawn::BeginPlay()
 
 void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
 {
-    const FVector LocalMove = FVector(CurrentForwardSpeed * DeltaSeconds, 0.f, 0.f);
-
-	// Move plan forwards (with sweep so we stop when we collide with things)
-	AddActorLocalOffset(LocalMove, true);
-
-	// Calculate change in rotation this frame
-	FRotator DeltaRotation(0,0,0);
-	DeltaRotation.Pitch = CurrentPitchSpeed * DeltaSeconds;
-	DeltaRotation.Yaw = CurrentYawSpeed * DeltaSeconds;
-	DeltaRotation.Roll = CurrentRollSpeed * DeltaSeconds;
-
-	// Rotate plane
-	AddActorLocalRotation(DeltaRotation);
-
     // Update our flight firmware
     hackflight.update();
 
@@ -163,6 +149,14 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
 
     // Rotate vehicle
     AddActorLocalRotation(DeltaSeconds * FRotator(forces[1], forces[2], forces[0]) * (180 / M_PI));
+
+    // Spin props proportionate to motor values, acumulating their sum 
+    float motorSum = 0;
+    for (uint8_t k=0; k<4; ++k) {
+        FRotator PropRotation(0, motorvals[k]*motordirs[k]*60, 0);
+        PropMeshes[k]->AddLocalRotation(PropRotation);
+        motorSum += motorvals[k];
+    }
 
     // Get current quaternion
     FQuat q = this->GetActorQuat();
@@ -184,17 +178,13 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
     float cosy = +1.0 - 2.0 * (q.Y * q.Y + q.Z * q.Z);
     float yaw = atan2(siny, cosy);
 
-    Debug::printf("%f %f %f", roll, pitch, yaw);
+    float x = -cos(yaw)*sin(pitch)*sin(roll)-sin(yaw)*cos(roll);
+    float y = -sin(yaw)*sin(pitch)*sin(roll)+cos(yaw)*cos(roll);
+    float z =  cos(pitch)*sin(roll);
 
-    PlaneMesh->AddForce(FVector(0, 0, 20000*(motorvals[0]+motorvals[1]+motorvals[2]+motorvals[3])/4));
+    Debug::printf("%f %f %f", x, y, z);
 
-    // Spin props proportionate to motor values, acumulating their sum for sound play
-    float motorSum = 0;
-    for (uint8_t k=0; k<4; ++k) {
-        FRotator PropRotation(0, motorvals[k]*motordirs[k]*60, 0);
-        PropMeshes[k]->AddLocalRotation(PropRotation);
-        motorSum += motorvals[k];
-    }
+    PlaneMesh->AddForce(5000*FVector(motorSum/10, 0, motorSum));
 
     // Modulate the pitch and voume of the propeller sound
     propellerAudioComponent->SetFloatParameter(FName("pitch"), motorSum / 4);
