@@ -82,6 +82,23 @@ AGroundCameraFlightPawn::AGroundCameraFlightPawn()
     elapsedTime = 0;
 }
 
+void AGroundCameraFlightPawn::BeginPlay()
+{
+    TArray<UStaticMeshComponent *> staticComponents;
+    this->GetComponents<UStaticMeshComponent>(staticComponents);
+
+    for (int i = 0; i < staticComponents.Num(); i++) {
+        if (staticComponents[i]) {
+            UStaticMeshComponent* child = staticComponents[i];
+            if (child->GetName() == "Prop1") {
+                PropMeshes[0] = child;
+            }
+        }
+	}
+
+    Super::BeginPlay();
+}
+
 void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
 {
 	const FVector LocalMove = FVector(CurrentForwardSpeed * DeltaSeconds, 0.f, 0.f);
@@ -111,18 +128,8 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
 
     PlaneMesh->AddForce(FVector(0, 0, 20000*(motors[0]+motors[1]+motors[2]+motors[3])/4));
 
-    TArray<UStaticMeshComponent *> staticComponents;
-    this->GetComponents<UStaticMeshComponent>(staticComponents);
-
-    for (int i = 0; i < staticComponents.Num(); i++) {
-        if (staticComponents[i]) {
-            UStaticMeshComponent* child = staticComponents[i];
-            if (child->GetName() == "Prop1") {
-                FRotator PropRotation(0, 10, 0);
-                child->AddLocalRotation(PropRotation);
-            }
-        }
-	}
+    FRotator PropRotation(0, 10, 0);
+    PropMeshes[0]->AddLocalRotation(PropRotation);
 
 	// Call any parent class Tick implementation
 	Super::Tick(DeltaSeconds);
