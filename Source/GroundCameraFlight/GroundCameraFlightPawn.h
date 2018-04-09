@@ -98,6 +98,9 @@ private:
     // Support for Hackflight::Board::getMicroseconds()
     float elapsedTime;
 
+    // Converts a set of motor values to angular forces in body frame
+    float motorsToAngularForce(int a, int b, int c, int d);
+        
 public:
 	/** Returns PlaneMesh subobject **/
 	FORCEINLINE class UStaticMeshComponent* GetPlaneMesh() const { return PlaneMesh; }

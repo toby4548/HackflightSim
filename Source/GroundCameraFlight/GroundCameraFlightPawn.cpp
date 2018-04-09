@@ -152,7 +152,18 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
     // Update our flight firmware
     hackflight.update();
 
+    // Accumulate elapsed time
     elapsedTime += DeltaSeconds;
+
+    // Compute body-frame roll, pitch, yaw velocities based on differences between motors
+    float forces[3];
+    forces[0] = motorsToAngularForce(2, 3, 0, 1);
+    forces[1] = motorsToAngularForce(1, 3, 0, 2); 
+    forces[2] = motorsToAngularForce(1, 2, 0, 3); 
+
+    AddActorLocalRotation(DeltaSeconds * FRotator(forces[1], forces[2], forces[0]) * (180 / M_PI));
+
+    Debug::printf("%f %f %f", forces[0], forces[1], forces[2]);
 
     PlaneMesh->AddForce(FVector(0, 0, 20000*(motorvals[0]+motorvals[1]+motorvals[2]+motorvals[3])/4));
 
@@ -164,7 +175,7 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
         motorSum += motorvals[k];
     }
 
-   // Modulate the pitch and voume of the propeller sound
+    // Modulate the pitch and voume of the propeller sound
     propellerAudioComponent->SetFloatParameter(FName("pitch"), motorSum / 4);
     propellerAudioComponent->SetFloatParameter(FName("volume"), motorSum / 4);
 
@@ -178,48 +189,15 @@ void AGroundCameraFlightPawn::NotifyHit(class UPrimitiveComponent* MyComp, class
     Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 
     // Deflect along the surface when we collide.
-	FRotator CurrentRotation = GetActorRotation();
-	SetActorRotation(FQuat::Slerp(CurrentRotation.Quaternion(), HitNormal.ToOrientationQuat(), 0.025f));
+    FRotator CurrentRotation = GetActorRotation();
+    SetActorRotation(FQuat::Slerp(CurrentRotation.Quaternion(), HitNormal.ToOrientationQuat(), 0.025f));
 }
 
-
-void AGroundCameraFlightPawn::ThrottleInput(float Val)
+float AGroundCameraFlightPawn::motorsToAngularForce(int a, int b, int c, int d)
 {
-	// Is there any input?
-	bool bHasInput = !FMath::IsNearlyEqual(Val, 0.f);
-	// If input is not held down, reduce speed
-	float CurrentAcc = bHasInput ? (Val * Acceleration) : (-0.5f * Acceleration);
-	// Calculate new speed
-	float NewForwardSpeed = CurrentForwardSpeed + (GetWorld()->GetDeltaSeconds() * CurrentAcc);
-	// Clamp between MinSpeed and MaxSpeed
-	CurrentForwardSpeed = FMath::Clamp(NewForwardSpeed, MinSpeed, MaxSpeed);
-}
+    float v = ((motorvals[a] + motorvals[b]) - (motorvals[c] + motorvals[d]));
 
-void AGroundCameraFlightPawn::PitchInput(float Val)
-{
-	// Target pitch speed is based in input
-	float TargetPitchSpeed = (Val * TurnSpeed * -1.f);
-
-	// When steering, we decrease pitch slightly
-	TargetPitchSpeed += (FMath::Abs(CurrentYawSpeed) * -0.2f);
-
-	// Smoothly interpolate to target pitch speed
-	CurrentPitchSpeed = FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
-}
-
-void AGroundCameraFlightPawn::YawInput(float Val)
-{
-	// Target yaw speed is based on input
-	float TargetYawSpeed = (Val * TurnSpeed);
-
-	// Smoothly interpolate to target yaw speed
-	CurrentYawSpeed = FMath::FInterpTo(CurrentYawSpeed, TargetYawSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
-}
-
-void AGroundCameraFlightPawn::RollInput(float Val)
-{
-	CurrentRollSpeed = 20*Val;
-
+    return (v<0 ? -1 : +1) * pow(fabs(v), 3);
 }
 
 void AGroundCameraFlightPawn::init(void)
@@ -248,4 +226,44 @@ void AGroundCameraFlightPawn::writeMotor(uint8_t index, float value)
     motorvals[index] = value;
 }
 
+/*
+void AGroundCameraFlightPawn::ThrottleInput(float Val)
+{
+    // Is there any input?
+    bool bHasInput = !FMath::IsNearlyEqual(Val, 0.f);
+    // If input is not held down, reduce speed
+    float CurrentAcc = bHasInput ? (Val * Acceleration) : (-0.5f * Acceleration);
+    // Calculate new speed
+    float NewForwardSpeed = CurrentForwardSpeed + (GetWorld()->GetDeltaSeconds() * CurrentAcc);
+    // Clamp between MinSpeed and MaxSpeed
+    CurrentForwardSpeed = FMath::Clamp(NewForwardSpeed, MinSpeed, MaxSpeed);
+}
+
+void AGroundCameraFlightPawn::PitchInput(float Val)
+{
+    // Target pitch speed is based in input
+    float TargetPitchSpeed = (Val * TurnSpeed * -1.f);
+
+    // When steering, we decrease pitch slightly
+    TargetPitchSpeed += (FMath::Abs(CurrentYawSpeed) * -0.2f);
+
+    // Smoothly interpolate to target pitch speed
+    CurrentPitchSpeed = FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
+}
+
+void AGroundCameraFlightPawn::YawInput(float Val)
+{
+    // Target yaw speed is based on input
+    float TargetYawSpeed = (Val * TurnSpeed);
+
+    // Smoothly interpolate to target yaw speed
+    CurrentYawSpeed = FMath::FInterpTo(CurrentYawSpeed, TargetYawSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
+}
+
+void AGroundCameraFlightPawn::RollInput(float Val)
+{
+    CurrentRollSpeed = 20*Val;
+
+}
+*/
 
