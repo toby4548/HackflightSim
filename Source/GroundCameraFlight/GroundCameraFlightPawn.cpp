@@ -161,30 +161,11 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
     // Get current quaternion
     FQuat q = this->GetActorQuat();
 
-    // Turn quaternion into Euler angles
-    // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+    FVector euler = q.Euler();
 
-    // roll (x-axis rotation)
-    float sinr = +2.0 * (q.W * q.X + q.Y * q.Z);
-    float cosr = +1.0 - 2.0 * (q.X * q.X + q.Y * q.Y);
-    float roll = atan2(sinr, cosr);
+    Debug::printf("%f %f %f", euler.X, euler.Y, euler.Z);
 
-    // pitch (y-axis rotation)
-    float sinp = +2.0 * (q.W * q.Y - q.Z * q.X);
-    float pitch = (fabs(sinp) >= 1) ?  copysign(M_PI / 2, sinp) /* use 90 degrees if out of range */ : asin(sinp);
-
-    // yaw (z-axis rotation)
-    float siny = +2.0 * (q.W * q.Z + q.X * q.Y);
-    float cosy = +1.0 - 2.0 * (q.Y * q.Y + q.Z * q.Z);
-    float yaw = atan2(siny, cosy);
-
-    float x = -cos(yaw)*sin(pitch)*sin(roll)-sin(yaw)*cos(roll);
-    float y = -sin(yaw)*sin(pitch)*sin(roll)+cos(yaw)*cos(roll);
-    float z =  cos(pitch)*sin(roll);
-
-    Debug::printf("%f %f %f", x, y, z);
-
-    PlaneMesh->AddForce(5000*FVector(motorSum/10, 0, motorSum));
+    PlaneMesh->AddForce(5000*FVector(0, 0, motorSum));
 
     // Modulate the pitch and voume of the propeller sound
     propellerAudioComponent->SetFloatParameter(FName("pitch"), motorSum / 4);
