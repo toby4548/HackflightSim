@@ -100,9 +100,6 @@ AGroundCameraFlightPawn::AGroundCameraFlightPawn()
 
 	// I want the sound to follow the pawn around, so I attach it to the Pawns root.
 	propellerAudioComponent->SetupAttachment(GetRootComponent());
-
-	// I want the sound to come from slighty in front of the pawn.
-	propellerAudioComponent->SetRelativeLocation(FVector(100.0f, 0.0f, 0.0f));
 }
 
 void AGroundCameraFlightPawn::PostInitializeComponents()
@@ -111,11 +108,6 @@ void AGroundCameraFlightPawn::PostInitializeComponents()
 		propellerAudioComponent->SetSound(propellerAudioCue);
 	}
 
-	Super::PostInitializeComponents();
-}
-
-void AGroundCameraFlightPawn::BeginPlay()
-{
     // Grab the static prop mesh components by name, storing them for use in Tick()
     TArray<UStaticMeshComponent *> staticComponents;
     this->GetComponents<UStaticMeshComponent>(staticComponents);
@@ -129,6 +121,11 @@ void AGroundCameraFlightPawn::BeginPlay()
         }
 	}
 
+	Super::PostInitializeComponents();
+}
+
+void AGroundCameraFlightPawn::BeginPlay()
+{
     // Start playing the sound.  Note that because the Cue Asset is set to loop the sound,
     // once we start playing the sound, it will play continiously...
     propellerAudioComponent->Play();
