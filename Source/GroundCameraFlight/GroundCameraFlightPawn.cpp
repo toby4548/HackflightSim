@@ -75,18 +75,50 @@ AGroundCameraFlightPawn::AGroundCameraFlightPawn()
 	MinSpeed = 500.f;
 	CurrentForwardSpeed = 0.f;//500.f;
 
+    // Initialize the motor-spin values
     for (uint8_t k=0; k<4; ++k) {
         motorvals[k] = 0;
     }
 
+    // Initialize elapsed time
     elapsedTime = 0;
+
+	// Load our Sound Cue for the propeller sound we created in the editor... 
+	// note your path may be different depending
+	// on where you store the asset on disk.
+	static ConstructorHelpers::FObjectFinder<USoundCue> propellerCue(TEXT("'/Game/Flying/Audio/MotorSoundCue'"));
+	
+	// Store a reference to the Cue asset - we'll need it later.
+	propellerAudioCue = propellerCue.Object;
+
+	// Create an audio component, the audio component wraps the Cue, 
+	// and allows us to ineract with it, and its parameters from code.
+	propellerAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("PropellerAudioComp"));
+
+	// I don't want the sound playing the moment it's created.
+	propellerAudioComponent->bAutoActivate = false;
+
+	// I want the sound to follow the pawn around, so I attach it to the Pawns root.
+	propellerAudioComponent->SetupAttachment(GetRootComponent());
+
+	// I want the sound to come from slighty in front of the pawn.
+	propellerAudioComponent->SetRelativeLocation(FVector(100.0f, 0.0f, 0.0f));
+}
+
+void AGroundCameraFlightPawn::PostInitializeComponents()
+{
+	if (propellerAudioCue->IsValidLowLevelFast()) {
+		propellerAudioComponent->SetSound(propellerAudioCue);
+	}
+
+	Super::PostInitializeComponents();
 }
 
 void AGroundCameraFlightPawn::BeginPlay()
 {
+    // Grab the static prop mesh components by name, storing them for use in Tick()
     TArray<UStaticMeshComponent *> staticComponents;
     this->GetComponents<UStaticMeshComponent>(staticComponents);
-
     for (int i = 0; i < staticComponents.Num(); i++) {
         if (staticComponents[i]) {
             UStaticMeshComponent* child = staticComponents[i];
@@ -97,12 +129,16 @@ void AGroundCameraFlightPawn::BeginPlay()
         }
 	}
 
+    // Start playing the sound.  Note that because the Cue Asset is set to loop the sound,
+    // once we start playing the sound, it will play continiously...
+    propellerAudioComponent->Play();
+
     Super::BeginPlay();
 }
 
 void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
 {
-	const FVector LocalMove = FVector(CurrentForwardSpeed * DeltaSeconds, 0.f, 0.f);
+    const FVector LocalMove = FVector(CurrentForwardSpeed * DeltaSeconds, 0.f, 0.f);
 
 	// Move plan forwards (with sweep so we stop when we collide with things)
 	AddActorLocalOffset(LocalMove, true);
@@ -123,11 +159,17 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
 
     PlaneMesh->AddForce(FVector(0, 0, 20000*(motorvals[0]+motorvals[1]+motorvals[2]+motorvals[3])/4));
 
-    // Spin props proportionate to motor values
+    // Spin props proportionate to motor values, acumulating their sum for sound play
+    float motorSum = 0;
     for (uint8_t k=0; k<4; ++k) {
         FRotator PropRotation(0, motorvals[k]*motordirs[k]*60, 0);
         PropMeshes[k]->AddLocalRotation(PropRotation);
+        motorSum += motorvals[k];
     }
+
+   // Modulate the pitch and voume of the propeller sound
+    propellerAudioComponent->SetFloatParameter(FName("pitch"), motorSum / 4);
+    propellerAudioComponent->SetFloatParameter(FName("volume"), motorSum / 4);
 
     // Call any parent class Tick implementation
     Super::Tick(DeltaSeconds);

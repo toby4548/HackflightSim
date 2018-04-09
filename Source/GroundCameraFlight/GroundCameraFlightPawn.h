@@ -10,6 +10,8 @@ using namespace hf;
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "Runtime/Engine/Classes/Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 #include "GroundCameraFlightPawn.generated.h"
 
 UCLASS(Config=Game)
@@ -17,18 +19,29 @@ class AGroundCameraFlightPawn : public APawn, public Board
 {
 	GENERATED_BODY()
 
-	/** StaticMesh component that will be the visuals for our flying pawn */
+	// StaticMesh component that will be the visuals for our flying pawn 
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* PlaneMesh;
 
-    // Propeller meshes
+    // Propeller meshes for spinning
 	class UStaticMeshComponent* PropMeshes[4];
+
+    // Audio support: see http://bendemott.blogspot.com/2016/10/unreal-4-playing-sound-from-c-with.html
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio", meta = (AllowPrivateAccess = "true"))
+        class USoundCue* propellerAudioCue;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio", meta = (AllowPrivateAccess = "true"))
+        class USoundCue* propellerStartupCue;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio", meta = (AllowPrivateAccess = "true"))
+        class UAudioComponent* propellerAudioComponent;
+
 
 public:
 	AGroundCameraFlightPawn();
 
 	// Begin AActor overrides
 	virtual void BeginPlay() override;
+    void PostInitializeComponents() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, 
             bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
@@ -78,16 +91,14 @@ private:
 	/** Current roll speed */
 	float CurrentRollSpeed;
 
+    // Support for spinning propellers
     const int8_t motordirs[4] = {+1, -1, -1, +1};
     float motorvals[4];
 
+    // Support for Hackflight::Board::getMicroseconds()
     float elapsedTime;
 
 public:
 	/** Returns PlaneMesh subobject **/
 	FORCEINLINE class UStaticMeshComponent* GetPlaneMesh() const { return PlaneMesh; }
-	/** Returns SpringArm subobject **/
-	//FORCEINLINE class USpringArmComponent* GetSpringArm() const { return SpringArm; }
-	/** Returns Camera subobject **/
-	//FORCEINLINE class UCameraComponent* GetCamera() const { return Camera; }
 };
