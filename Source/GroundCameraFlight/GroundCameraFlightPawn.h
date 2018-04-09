@@ -78,6 +78,7 @@ private:
 	/** Current roll speed */
 	float CurrentRollSpeed;
 
+    const int8_t motordirs[4] = {+1, -1, -1, +1};
     float motorvals[4];
 
     float elapsedTime;

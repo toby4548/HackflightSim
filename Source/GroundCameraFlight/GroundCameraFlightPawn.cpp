@@ -125,7 +125,7 @@ void AGroundCameraFlightPawn::Tick(float DeltaSeconds)
 
     // Spin props proportionate to motor values
     for (uint8_t k=0; k<4; ++k) {
-        FRotator PropRotation(0, motorvals[k]*60, 0);
+        FRotator PropRotation(0, motorvals[k]*motordirs[k]*60, 0);
         PropMeshes[k]->AddLocalRotation(PropRotation);
     }
 
