@@ -98,10 +98,6 @@ AGroundCameraFlightPawn::AGroundCameraFlightPawn()
     // Set up the FPV camera
     fpvSpringArm = CreateDefaultSubobject<USpringArmComponent>(L"FpvSpringArm");
     fpvSpringArm->SetupAttachment(RootComponent);
-    fpvSpringArm->TargetArmLength = -100;
-    fpvSpringArm->SetRelativeLocation(FVector(0, 0, 0));
-    fpvSpringArm->bUsePawnControlRotation = false; 
-	fpvSpringArm->bEnableCameraLag = false;
     fpvCamera = CreateDefaultSubobject<UCameraComponent>(L"FpvCamera");
     fpvCamera ->SetupAttachment(fpvSpringArm, USpringArmComponent::SocketName); 
 }
