@@ -94,6 +94,16 @@ AGroundCameraFlightPawn::AGroundCameraFlightPawn()
 
 	// I want the sound to follow the pawn around, so I attach it to the Pawns root.
 	propellerAudioComponent->SetupAttachment(GetRootComponent());
+
+    // Set up the FPV camera
+    fpvSpringArm = CreateDefaultSubobject<USpringArmComponent>(L"FpvSpringArm");
+    fpvSpringArm->SetupAttachment(RootComponent);
+    fpvSpringArm->TargetArmLength = 0;
+    fpvSpringArm->SetRelativeLocation(FVector(0, 0, 0));
+    fpvSpringArm->bUsePawnControlRotation = false; 
+	fpvSpringArm->bEnableCameraLag = false;
+    fpvCamera = CreateDefaultSubobject<UCameraComponent>(L"FpvCamera");
+    fpvCamera ->SetupAttachment(fpvSpringArm, USpringArmComponent::SocketName); 
 }
 
 void AGroundCameraFlightPawn::PostInitializeComponents()
