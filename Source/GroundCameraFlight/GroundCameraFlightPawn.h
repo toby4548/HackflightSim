@@ -53,44 +53,6 @@ public:
     virtual uint32_t getMicroseconds() override;
     virtual void     writeMotor(uint8_t index, float value) override;
 
-
-protected:
-
-	void ThrottleInput(float Val);
-	void PitchInput(float Val);
-	void RollInput(float Val);
-	void YawInput(float Val);
-
-private:
-
-	/** How quickly forward speed changes */
-	UPROPERTY(Category=Plane, EditAnywhere)
-	float Acceleration;
-
-	/** How quickly pawn can steer */
-	UPROPERTY(Category=Plane, EditAnywhere)
-	float TurnSpeed;
-
-	/** Max forward speed */
-	UPROPERTY(Category = Pitch, EditAnywhere)
-	float MaxSpeed;
-
-	/** Min forward speed */
-	UPROPERTY(Category=Yaw, EditAnywhere)
-	float MinSpeed;
-
-	/** Current forward speed */
-	float CurrentForwardSpeed;
-
-	/** Current yaw speed */
-	float CurrentYawSpeed;
-
-	/** Current pitch speed */
-	float CurrentPitchSpeed;
-
-	/** Current roll speed */
-	float CurrentRollSpeed;
-
     // Support for spinning propellers
     const int8_t motordirs[4] = {+1, -1, -1, +1};
     float motorvals[4];
@@ -102,6 +64,6 @@ private:
     float motorsToAngularForce(int a, int b, int c, int d);
         
 public:
-	/** Returns PlaneMesh subobject **/
+	// Returns PlaneMesh subobject 
 	FORCEINLINE class UStaticMeshComponent* GetPlaneMesh() const { return PlaneMesh; }
 };
