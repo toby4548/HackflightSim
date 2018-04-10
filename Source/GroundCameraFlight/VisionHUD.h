@@ -21,10 +21,10 @@ class GROUNDCAMERAFLIGHT_API AVisionHUD : public AHUD
 
 	virtual void DrawHUD() override;
 
-	const float LEFTX  = 45.f;
-	const float TOPY   = 90.f;
-	const float WIDTH  = 256.f;
-	const float HEIGHT = 128.f;
+	const float LEFTX  = 20;
+	const float TOPY   = 20;
+	const float WIDTH  = 256;
+	const float HEIGHT = 128;
 	
 	const FLinearColor BORDER_COLOR = FLinearColor::Yellow;
 	const float BORDER_WIDTH = 2.0f;
